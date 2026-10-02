@@ -24,6 +24,7 @@ def _():
     import numpy as np
     from scipy.integrate import solve_ivp
 
+    print(80*'=')
     return mo, np, plt, solve_ivp
 
 
@@ -198,6 +199,20 @@ def _(
     variables,
     weights,
 ):
+    # Настройки маркеров по сценариям: здесь можно менять форму и размер.
+    marker_styles = {
+        "Базовый": "o",
+        "Технологическая модернизация": "s",
+        "Экологический": "^",
+        "Комбинированный": "D",
+    }
+    marker_sizes = {
+        "Базовый": 8,
+        "Технологическая модернизация": 8,
+        "Экологический": 8,
+        "Комбинированный": 8,
+    }
+
     fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
     axes = axes.ravel()
     results = {}
@@ -225,31 +240,53 @@ def _(
         results[_name] = {"T": T, "S": S, "I": I, "E": E, "U": U}
 
         for _ax, _series in zip(axes, (T, S, I, E)):
-            _ax.plot(time, _series, label=_name, linewidth=2)
+            _ax.plot(
+                time,
+                _series,
+                label=_name,
+                linewidth=1,
+                marker=marker_styles[_name],
+                markevery=12,
+                markersize=marker_sizes[_name],
+                markerfacecolor="none",
+                markeredgewidth=1,
+            )
 
     for _ax, _title in zip(axes, variables):
         _ax.set_title(_title)
-        _ax.set_xlabel("Год")
-        _ax.set_ylabel("Нормированный индекс")
+        _ax.set_xlabel("Год", fontsize=12)
+        _ax.tick_params(axis="x", labelbottom=True, labelsize=12)
+        _ax.set_ylabel("Нормированный индекс", fontsize=12)
         _ax.grid(True, alpha=0.3)
-        _ax.legend(fontsize=8)
+        _ax.legend(fontsize=12)
 
     fig.tight_layout()
     fig
-    return (results,)
+    return marker_sizes, marker_styles, results
 
 
 @app.cell
-def _(plt, results, time):
+def _(marker_sizes, marker_styles, plt, results, time):
     summary_fig, summary_ax = plt.subplots(figsize=(8, 5))
     for _name, _result in results.items():
-        summary_ax.plot(time, _result["U"], label=_name, linewidth=2)
+        summary_ax.plot(
+            time,
+            _result["U"],
+            label=_name,
+            linewidth=1,
+            marker=marker_styles[_name],
+            markevery=12,
+            markersize=marker_sizes[_name],
+            markerfacecolor="none",
+            markeredgewidth=1,
+        )
 
     summary_ax.set_title("Интегральный индекс сбалансированного устойчивого развития")
-    summary_ax.set_xlabel("Год")
-    summary_ax.set_ylabel("Индекс U(t)")
+    summary_ax.set_xlabel("Год", fontsize=12)
+    summary_ax.set_ylabel("Индекс U(t)", fontsize=12)
+    summary_ax.tick_params(axis="both", labelsize=12)
     summary_ax.grid(True, alpha=0.3)
-    summary_ax.legend()
+    summary_ax.legend(fontsize=12)
     summary_fig.tight_layout()
 
     for _name, _result in results.items():
